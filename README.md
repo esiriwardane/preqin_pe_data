@@ -1,4 +1,4 @@
-# An Empirical Guide to Investor-Level Private EquityData from Preqin
+# An Empirical Guide to Investor-Level Private Equity Data from Preqin
 
 This code replicates the results from Begenau, Robles-Garcia, Siriwardane, and Wang (2020). 
 
