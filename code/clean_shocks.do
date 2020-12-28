@@ -138,7 +138,7 @@ esttab using $tables/table_commitment_shocks.tex,
 * ------------------------------------------------------------------------------
 
 * ---- Contributions ---- *
-*Amortize contribution changes. For funds < 1, assume age is 2Q
+*Amortize contribution changes. For funds < 1, assume age is 4Q
 bys id_pair (yq): gen ann_delta_contrib = delta_contrib / capped_age
 
 *Define age buckets
@@ -165,7 +165,7 @@ gen is_obs_contrib_lrg_neg = ann_delta_contrib < -`neg_contribution_thresh'
 egen is_cell_contrib_lrg_neg = max(is_obs_contrib_lrg_neg), by(id_pair)
 
 * ---- Distributions ---- *
-*Amortize distribution changes. For funds < 1, assume age is 2Q
+*Amortize distribution changes. For funds < 1, assume age is 4Q
 bys id_pair (yq): gen ann_delta_distrib = delta_distrib / capped_age
 
 *Tabulate negative distributions
@@ -485,14 +485,3 @@ label variable is_obs_basic "Any large negative shock"
 
 *Save a dataset that retains all the tags and sources
 save $derived/preqin_data_all_tags.dta, replace
-
-/*
-	Drop large negative shocks to contributions/distributions
-	Note: There is only 1 LP who has multiple sources per fund-quarter.
-		  This LP has a source whose name contains "Source ID for CF Data only",
-		  so We drop this source. All other fund-investor-quarters are unique.
-*/
-
-sum source_id if source_id == 1354
-drop if is_cell_basic == 1 | source_id == 1354
-save $derived/preqin_data_clean.dta, replace
