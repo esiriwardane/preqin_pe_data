@@ -5,7 +5,10 @@ Create final dataset according to Section 5:
 	3. 13 LPs for whom 2.7% of observations have any potential quality issues
 	4. There is only 1 LP who has multiple sources per fund-quarter. This LP 
 	   has a source whose name contains "Source ID for CF Data only", so we 
-	   drop this source. All other fund-investor-quarters are unique.				 
+	   drop this source. All other fund-investor-quarters are unique
+	5. There is another three further investors who have multiple sources per
+	   fund_id-investor cell. We take the source with the most observations and
+	   break ties with the source who has the latest data
 */
 
 
@@ -32,7 +35,26 @@ sum _merge if _merge == 3
 drop if is_cell_basic == 1 | source_id == 1354 | _merge == 3
 drop _merge
 
+*Within an fund-investor, keep source with most obs. Breaking ties w/ latest
+egen source_count = count(yq), by(fund_id investorid source_id)
+egen max_source = max(source_count), by(fund_id investorid)
+
+egen last_source_date = max(yq), by(fund_id investorid source_id)
+egen max_source_date = max(yq), by(fund_id investorid)
+
+gen source_to_keep =  source_count == max_source ///
+	& last_source_date == max_source_date
+tab source_to_keep
+keep if source_to_keep
+
+*Check to make sure there are not multiple sources per fund-investor
+egen unique_source = nvals(source_id), by(fund_id investorid) 
+tab unique_source
+drop unique_source source_count max_source last_source_date max_source_date ///
+	source_to_keep
+
 *Save
+sort fund_id investorid yq
 save $derived/preqin_data_clean.dta, replace
 
 
